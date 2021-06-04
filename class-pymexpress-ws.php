@@ -238,7 +238,7 @@ class Pymexpress_WSC {
 			),
 		);
 
-		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__  ) ) {
+		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__ ) ) {
 
 			$response = $this->request( 'ccrCodCanton', $replacements );
 
@@ -394,18 +394,17 @@ class Pymexpress_WSC {
 	 * @param string $canton_origen  Origin Canton ID.
 	 * @param string $provincia_destino Destination Provincia ID.
 	 * @param string $canton_destino Destination Canton ID.
-	 * @param string $servicio  Service.
 	 * @param int    $peso Weight in grams.
 	 * @return string
 	 */
-	public function get_tarifa( $provincia_origen, $canton_origen, $provincia_destino, $canton_destino, $servicio, $peso ) {
+	public function get_tarifa( $provincia_origen, $canton_origen, $provincia_destino, $canton_destino, $peso ) {
 		$rate         = array();
 		$replacements = array(
 			'%ProvinciaOrigen%'  => $provincia_origen,
 			'%CantonOrigen%'     => $canton_origen,
 			'%ProvinciaDestino%' => $provincia_destino,
 			'%CantonDestino%'    => $canton_destino,
-			'%Servicio%'         => $servicio,
+			'%Servicio%'         => $this->credentials['Service_id'],
 			'%Peso%'             => $peso,
 		);
 		$data_types   = array(
@@ -638,7 +637,7 @@ class Pymexpress_WSC {
 					continue;
 				} else {
 					// translators: Param lenght and param data.
-					error_log( sprintf( __( 'Empty parameter "%1$s" called from "%2$s".', 'mojito-shipping' ), $field, $method ) );
+					error_log( sprintf( 'Empty parameter "%1$s" called from "%2$s".', $field, $method ) );
 					$try_register = false;
 				}
 			}
@@ -651,7 +650,7 @@ class Pymexpress_WSC {
 				$param_len  = strlen( $field_value );
 				if ( $param_len > $max_length ) {
 					// translators: Param lenght and param data.
-					error_log( sprintf( __( '"%1$s" cannot exceed %2$s characters. Given: %3$s, "%4$s" called from "%5$s"', 'mojito-shipping' ), $field, $max_length, $param_len, $field_value, $method ) );
+					error_log( sprintf( '"%1$s" cannot exceed %2$s characters. Given: %3$s, "%4$s" called from "%5$s"', $field, $max_length, $param_len, $field_value, $method ) );
 					$try_register = false;
 				}
 			}
@@ -661,7 +660,7 @@ class Pymexpress_WSC {
 			 */
 			if ( 'numeric' === $field_params['type'] ) {
 				if ( ! is_numeric( $field_value ) ) {
-					error_log( sprintf( __( 'Bad "%1$s" Given: "%2$s" called from "%3$s"', 'mojito-shipping' ), $field, $field_value, $method ) );
+					error_log( sprintf( 'Bad "%1$s" Given: "%2$s" called from "%3$s"', $field, $field_value, $method ) );
 					$try_register = false;
 				}
 			}
@@ -770,7 +769,7 @@ class Pymexpress_WSC {
 		 * Proxy settings
 		 */
 		if ( empty ( $this->proxy_settings) ) {
-			return;
+			return $parameters;
 		}
 
 		$proxy_hostname = $this->proxy_settings['hostname'];
