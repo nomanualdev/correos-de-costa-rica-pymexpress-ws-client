@@ -5,11 +5,10 @@ PHP WS Client Based on Mojito Shipping
 Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpress). Requiere de datos de conexión, si usted no cuenta con estos datos puede solicitarlos al correo jmora {arroba} correos.go.cr
 
 
-/**
- * Inicializar
- */
+Inicializar
+```
 $pymexpress = new Pymexpress\Pymexpress_WSC( $username, $password, $user_id, $service_id, $client_code, $environment );
-
+```
 /**
  * Asignar Proxy [ Opcional ]
  */
