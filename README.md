@@ -82,3 +82,41 @@ $codigo_postal = $pymexpress->get_codigo_postal( '1', '01', '01' );
 ```
 $tarifa = $pymexpress->get_tarifa( '1', '01', '1', '01', '1000' );
 ```
+
+
+**Registrar envío**
+
+Número de pedido
+```
+$order_id = '1942';
+```
+
+Parámetros de envío
+```
+$params   = array(
+	'DEST_APARTADO'  => '10101', // Código postal destino
+	'DEST_DIRECCION' => '100 mts sur del Wallmart', // Dirección
+	'DEST_NOMBRE'    => 'Pedro Perez', // Nombre del destinatario
+	'DEST_TELEFONO'  => '22334455', // Teléfono del destinatario
+	'DEST_ZIP'       => '10101', // Código postal destino
+	'ENVIO_ID'       => 'PY000000000CR' // Número de guía
+	'MONTO_FLETE'    => '2500', // Costo del envío
+	'OBSERVACIONES'  => 'Ropa y otros productos', // Descripción
+	'PESO'           => '2000', // peso en gramos
+);
+```
+
+Sender
+```
+$sender = array(
+	'direction' => 'San José, Pavas',
+	'name'      => 'Mi Tienda en línea.com',
+	'phone'     => '88776655',
+	'zip'       => '20301', // Código postal del remitente
+);
+```
+
+Enviar a Correos de Costa Rica
+```
+$envio = $pymexpress->registro_envio( $order_id, $params, $sender );
+```
