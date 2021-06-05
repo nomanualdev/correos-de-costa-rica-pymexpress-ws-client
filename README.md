@@ -4,6 +4,8 @@ PHP WS Client Based on Mojito Shipping
 
 Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpress). Requiere de datos de conexión, si usted no cuenta con estos datos puede solicitarlos al correo jmora {arroba} correos.go.cr
 
+Se usa Curl en lugar de SoapClient, esto permite controlar el timeout cuando la IP no está autorizada en el firewall de Correos de Costa Rica.
+
 
 **Inicializar**
 ```
