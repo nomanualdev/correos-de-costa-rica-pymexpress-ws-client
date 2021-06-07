@@ -1,0 +1,6 @@
+{
+    "name": "nomanualdev/correos-de-costa-rica-pymexpress-ws-client",
+    "description": "Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpress).",
+    "type": "library",
+    "require": {}
+}
