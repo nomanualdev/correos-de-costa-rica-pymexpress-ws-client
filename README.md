@@ -6,6 +6,13 @@ Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpres
 
 Se usa Curl en lugar de SoapClient, esto permite controlar el timeout cuando la IP no está autorizada en el firewall de Correos de Costa Rica.
 
+**Instalación**
+
+Composer
+```
+composer require nomanualdev/correos-de-costa-rica-pymexpress-ws-client
+```
+
 
 **Inicializar**
 ```
