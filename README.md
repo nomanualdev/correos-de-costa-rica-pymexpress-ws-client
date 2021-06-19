@@ -64,7 +64,7 @@ $distritos = $pymexpress->get_distritos( '1', '01' );
 
 
 
-**Obtener distritos de un cantón**
+**Obtener barrios de un cantón**
 - 1 = San José
 - 01 = San José
 - 01 = Carmen
