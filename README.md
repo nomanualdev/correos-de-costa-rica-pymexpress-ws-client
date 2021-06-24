@@ -18,6 +18,7 @@ composer require nomanualdev/correos-de-costa-rica-pymexpress-ws-client
 
 
 **Inicializar**
+
 $environment acepta "sandbox" o "production" (Pendiente: URLs de producción. Actualmente la conexión se hace hacia sandbox / pruebas ).
 
 ```
