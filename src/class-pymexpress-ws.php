@@ -222,7 +222,7 @@ class Pymexpress_WSC {
 	/**
 	 * Get cantones from a Provincia
 	 *
-	 * @param string $codigo_provincia Provicia ID.
+	 * @param string $codigo_provincia Provincia ID.
 	 * @return array
 	 */
 	public function get_cantones( $codigo_provincia ) {
@@ -256,7 +256,7 @@ class Pymexpress_WSC {
 	/**
 	 * Get distritos from a Provincia and Canton
 	 *
-	 * @param string $codigo_provincia Provicia ID.
+	 * @param string $codigo_provincia Provincia ID.
 	 * @param string $codigo_canton Cantón ID.
 	 * @return array
 	 */
@@ -297,7 +297,7 @@ class Pymexpress_WSC {
 	/**
 	 * Get barrios from a Provincia, Canton and Distrito
 	 *
-	 * @param string $codigo_provincia Provicia ID.
+	 * @param string $codigo_provincia Provincia ID.
 	 * @param string $codigo_canton Cantón ID.
 	 * @param string $codigo_distrito Distrito ID.
 	 * @return array
@@ -349,7 +349,7 @@ class Pymexpress_WSC {
 	/**
 	 * Get Zip code from a Provincia, Canton and Distrito
 	 *
-	 * @param string $codigo_provincia Provicia ID.
+	 * @param string $codigo_provincia Provincia ID.
 	 * @param string $codigo_canton Cantón ID.
 	 * @param string $codigo_distrito Distrito ID.
 	 * @return string

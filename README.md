@@ -7,7 +7,12 @@ Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpres
 Se usa Curl en lugar de SoapClient, esto permite controlar el timeout cuando la IP no está autorizada en el firewall de Correos de Costa Rica.
 
 
+Pymexpress y otros son marcas propias de Correos de Costa Rica.
+
+
 **Inicializar**
+$environment acepta "sandbox" o "production" (Pendiente: URLs de producción. Actualmente la conexión se hace hacia sandbox / pruebas ).
+
 ```
 $pymexpress = new Pymexpress\Pymexpress_WSC( $username, $password, $user_id, $service_id, $client_code, $environment );
 ```
@@ -33,7 +38,7 @@ $guia = $pymexpress->generar_guia();
 
 
 
-**Obtener provicias**
+**Obtener provincias**
 ```
 $provincias = $pymexpress->get_provincias();
 ```
