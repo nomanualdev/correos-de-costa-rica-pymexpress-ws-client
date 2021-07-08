@@ -95,11 +95,10 @@ class Pymexpress_WSC {
 			$this->environment['process_port'] = 84;
 
 		} elseif ( 'production' === $environment ) {
-			error_log( 'pendiente actualizar URL de produccion en pymexpress WS class' );
-			$this->environment['auth_port']    = 442;
-			$this->environment['auth_url']     = 'https://servicios.correos.go.cr:442/Token/authenticate';
-			$this->environment['process_url']  = 'http://amistad.correos.go.cr:84/wsAppCorreos.wsAppCorreos.svc';
-			$this->environment['process_port'] = 84;
+			$this->environment['auth_port']    = 447;
+			$this->environment['auth_url']     = 'https://servicios.correos.go.cr:447/Token/authenticate';
+			$this->environment['process_url']  = 'https://amistadpro.correos.go.cr:444/wsAppCorreos.wsAppCorreos.svc?WSDL';
+			$this->environment['process_port'] = 444;
 		}
 
 		$this->methods = array(
@@ -144,6 +143,7 @@ class Pymexpress_WSC {
 			CURLOPT_ENCODING       => '',
 			CURLOPT_MAXREDIRS      => 10,
 			CURLOPT_TIMEOUT        => 30,
+			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST  => 'POST',
 			CURLOPT_POSTFIELDS     => json_encode( $body ),
@@ -711,6 +711,7 @@ class Pymexpress_WSC {
 			CURLOPT_ENCODING       => '',
 			CURLOPT_MAXREDIRS      => 10,
 			CURLOPT_TIMEOUT        => 30,
+			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST  => 'POST',
 			CURLOPT_POSTFIELDS     => $this->get_soap_fields( $method, $replacements ),
