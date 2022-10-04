@@ -552,6 +552,8 @@ class Pymexpress_WSC {
 				error_log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $response['aCodRespuesta'], $response['aMensajeRespuesta'] ) );
 				error_log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
 
+				return $response;
+
 			} elseif ( ! empty( $response ) ) {
 				error_log( sprintf( 'CodRespuesta: %s, Args: %s', print_r( $response, 1 ), print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
 

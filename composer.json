@@ -3,10 +3,14 @@
     "description": "Clase de conexión para el nuevo Web Service de Correos de Costa Rica (Pymexpress).",
     "type": "library",
 	"license": "MIT",
-    "require": {},
-	"autoload" : {
+    "autoload" : {
 		"classmap": [
 			"src/class-pymexpress-ws.php"
 		]
-	}
+	},
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }
