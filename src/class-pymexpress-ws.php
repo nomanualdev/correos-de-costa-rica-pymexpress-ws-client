@@ -13,71 +13,21 @@ namespace Pymexpress;
 
 /**
  * Web Service connector class
- * Updated to 2021
+ * Updated to 2022
  */
 class Pymexpress_WSC {
 
 	/**
-	 * The array of methods registered.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      array    $methods  The methods registered.
-	 */
-	private $methods;
-
-	/**
-	 * The array of credentials.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      array    $credentials  The credentials.
-	 */
-	private $credentials;
-
-	/**
-	 * Array of enviroment settings.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var array
-	 */
-	private $environment;
-
-	/**
-	 * Access Token
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var string
-	 */
-	private $token;
-
-	/**
-	 * Access token timestamp. Max 5min
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var string
-	 */
-	private $token_timestamp;
-
-	/**
-	 * Set Proxy settings
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var string
-	 */
-	private $proxy_settings;
-
-	/**
 	 * Constructor for webservice client
-	 *
-	 * @access public
-	 * @return void
 	 */
-	public function __construct( $username, $password, $user_id, $service_id, $client_code, $environment = 'sandbox' ) {
+	public function __construct( string $username, string $password, string $user_id, string $service_id, string $client_code, string $environment = 'sandbox' )
+	{
+
+		/**
+		 * Set debug = true to log errors.
+		 * $pymespress->debug = true;
+		 */
+		$this->log = false;
 
 		$this->credentials = array(
 			'Username'    => $username,
@@ -85,8 +35,9 @@ class Pymexpress_WSC {
 			'User_id'     => $user_id,
 			'Service_id'  => $service_id,
 			'Client_code' => $client_code,
-
 		);
+
+		$this->system = 'PYMEXPRESS';
 
 		if ( 'sandbox' === $environment ) {
 			$this->environment['auth_port']    = 442;
@@ -112,26 +63,37 @@ class Pymexpress_WSC {
 			'ccrRegistroEnvio',
 			'ccrMovilTracking',
 		);
+
+		if ( session_status() === PHP_SESSION_NONE ) {
+			session_start();
+		}
 	}
 
+	private function log( $message )
+	{
+		if ( $this->debug ) {
+			error_log( print_r( $message, true ) );
+		}
+	}
 
 	/**
 	 * Authentication method
 	 */
-	private function auth() {
+	private function auth(): string|bool 
+	{
 
 		if ( empty( $this->credentials['Username'] ) || empty( $this->credentials['Password'] ) ) {
-			return;
+			return false;
 		}
 
 		if ( empty( $this->environment['auth_port'] ) || empty( $this->environment['auth_url'] ) ) {
-			return;
+			return false;
 		}
 
 		$body = array(
 			'Username' => $this->credentials['Username'],
 			'Password' => $this->credentials['Password'],
-			'Sistema'  => 'PYMEXPRESS',
+			'Sistema'  => $this->system,
 		);
 
 		$curl = curl_init();
@@ -162,7 +124,7 @@ class Pymexpress_WSC {
 		curl_close( $curl );
 
 		if ( $err ) {
-			error_log( $err );
+			$this->log( $err );
 
 		} else {
 
@@ -178,11 +140,11 @@ class Pymexpress_WSC {
 		}
 	}
 
-
 	/**
 	 * Get token
 	 */
-	public function get_token() {
+	public function get_token(): string
+	{
 
 		// Max token lifetime is 5 min. Due the connection timeout is 5 - 30 seconds we calculate 4 min 30 s.
 		if ( empty ( $_SESSION['ccr_token']['time'] ) ) {
@@ -201,15 +163,14 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get provincias from CCR WS
-	 *
-	 * @return array
 	 */
-	public function get_provincias() {
+	public function get_provincias(): array 
+	{
 
 		$provincias = array();
 		$response   = $this->request( 'ccrCodProvincia' );
 
-		foreach ( $response->aProvincias->accrItemGeografico as $key => $obj ) {
+		foreach ( $response?->aProvincias?->accrItemGeografico as $key => $obj ) {
 			$data                  = (array) $obj;
 			$codigo                = (string) $data['aCodigo'];
 			$descripcion           = $data['aDescripcion'];
@@ -221,15 +182,13 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get cantones from a Provincia
-	 *
-	 * @param string $codigo_provincia Provincia ID.
-	 * @return array
 	 */
-	public function get_cantones( $codigo_provincia ) {
+	public function get_cantones( string $province_code ): array 
+	{
 
 		$cantones     = array();
 		$replacements = array(
-			'%CodProvincia%' => $codigo_provincia,
+			'%CodProvincia%' => $province_code,
 		);
 		$data_types = array(
 			'%CodProvincia%' => array(
@@ -242,7 +201,7 @@ class Pymexpress_WSC {
 
 			$response = $this->request( 'ccrCodCanton', $replacements );
 
-			foreach ( $response->aCantones->accrItemGeografico as $key => $obj ) {
+			foreach ( $response?->aCantones?->accrItemGeografico as $key => $obj ) {
 				$data                = (array) $obj;
 				$codigo              = (string) $data['aCodigo'];
 				$descripcion         = $data['aDescripcion'];
@@ -255,17 +214,14 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get distritos from a Provincia and Canton
-	 *
-	 * @param string $codigo_provincia Provincia ID.
-	 * @param string $codigo_canton Cantón ID.
-	 * @return array
 	 */
-	public function get_distritos( $codigo_provincia, $codigo_canton ) {
+	public function get_distritos( string $province_code, string $canton_code ): array 
+	{
 
 		$distritos    = array();
 		$replacements = array(
-			'%CodProvincia%' => $codigo_provincia,
-			'%CodCanton%'    => $codigo_canton,
+			'%CodProvincia%' => $province_code,
+			'%CodCanton%'    => $canton_code,
 		);
 		$data_types = array(
 			'%CodProvincia%' => array(
@@ -282,7 +238,7 @@ class Pymexpress_WSC {
 
 			$response = $this->request( 'ccrCodDistrito', $replacements );
 
-			foreach ( $response->aDistritos->accrItemGeografico as $key => $obj ) {
+			foreach ( $response?->aDistritos?->accrItemGeografico as $key => $obj ) {
 				$data                 = (array) $obj;
 				$codigo               = (string) $data['aCodigo'];
 				$descripcion          = $data['aDescripcion'];
@@ -296,19 +252,15 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get barrios from a Provincia, Canton and Distrito
-	 *
-	 * @param string $codigo_provincia Provincia ID.
-	 * @param string $codigo_canton Cantón ID.
-	 * @param string $codigo_distrito Distrito ID.
-	 * @return array
 	 */
-	public function get_barrios( $codigo_provincia, $codigo_canton, $codigo_distrito ) {
+	public function get_barrios( string $province_code, string $canton_code, string $district_code ): array 
+	{
 
 		$barrios      = array();
 		$replacements = array(
-			'%CodProvincia%' => $codigo_provincia,
-			'%CodCanton%'    => $codigo_canton,
-			'%CodDistrito%'  => $codigo_distrito,
+			'%CodProvincia%' => $province_code,
+			'%CodCanton%'    => $canton_code,
+			'%CodDistrito%'  => $district_code,
 		);
 		$data_types   = array(
 			'%CodProvincia%' => array(
@@ -329,7 +281,7 @@ class Pymexpress_WSC {
 
 			$response = $this->request( 'ccrCodBarrio', $replacements );
 
-			foreach ( $response->aBarrios->accrBarrio as $key => $obj ) {
+			foreach ( $response?->aBarrios?->accrBarrio as $key => $obj ) {
 				$data      = (array) $obj;
 				$codigo    = (string) $data['aCodBarrio'];
 				$sucursal  = (string) $data['aCodSucursal'];
@@ -348,20 +300,16 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get Zip code from a Provincia, Canton and Distrito
-	 *
-	 * @param string $codigo_provincia Provincia ID.
-	 * @param string $codigo_canton Cantón ID.
-	 * @param string $codigo_distrito Distrito ID.
-	 * @return string
 	 */
-	public function get_codigo_postal( $codigo_provincia, $codigo_canton, $codigo_distrito ) {
+	public function get_codigo_postal( string $province_code, string $canton_code, string $district_code ): string 
+	{
 
 		$zip = '';
 
 		$replacements = array(
-			'%CodProvincia%' => $codigo_provincia,
-			'%CodCanton%'    => $codigo_canton,
-			'%CodDistrito%'  => $codigo_distrito,
+			'%CodProvincia%' => $province_code,
+			'%CodCanton%'    => $canton_code,
+			'%CodDistrito%'  => $district_code,
 		);
 		$data_types   = array(
 			'%CodProvincia%' => array(
@@ -389,15 +337,12 @@ class Pymexpress_WSC {
 
 	/**
 	 * Get Tarifa
-	 *
-	 * @param string $provincia_origen  Origin Provincia.
-	 * @param string $canton_origen  Origin Canton ID.
-	 * @param string $provincia_destino Destination Provincia ID.
-	 * @param string $canton_destino Destination Canton ID.
-	 * @param int    $peso Weight in grams.
-	 * @return string
 	 */
-	public function get_tarifa( $provincia_origen, $canton_origen, $provincia_destino, $canton_destino, $peso ) {
+	public function get_tarifa( string $provincia_origen, string $canton_origen, string $provincia_destino, string $canton_destino, int $peso ): array 
+	{
+		if ( $peso < 1000 ) {
+			$peso = 1000;
+		}
 		$rate         = array();
 		$replacements = array(
 			'%ProvinciaOrigen%'  => $provincia_origen,
@@ -451,7 +396,8 @@ class Pymexpress_WSC {
 	 *
 	 * @return string
 	 */
-	public function generar_guia() {
+	public function generar_guia(): string 
+	{
 		$response = $this->request( 'ccrGenerarGuia' );
 		$data     = (array) $response;
 		return $data['aNumeroEnvio'];
@@ -460,16 +406,14 @@ class Pymexpress_WSC {
 
 	/**
 	 * Registrar envío.
-	 *
-	 * @param Int   $order_id Order id.
-	 * @param array $params Params to register the package.
-	 * @param array $sender Sender details.
-	 * @return mixed
 	 */
-	public function registro_envio( $order_id, $params, $sender ) {
+	public function registro_envio( string $order_id, array $params, array $sender ): array 
+	{
 
-		$response     = '';
-		$status       = '';
+		$response     = array(
+			'status'   => '',
+			'response' => array(),
+		);
 		$replacements = array(
 			'%Cliente%'        => $this->credentials['Client_code'],
 			'%COD_CLIENTE%'    => $this->credentials['Client_code'],
@@ -543,42 +487,38 @@ class Pymexpress_WSC {
 
 		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__ ) ) {
 
-			$response = $this->request( 'ccrRegistroEnvio', $replacements );
-
-			if ( is_object( $response ) && isset( $response->aCodRespuesta ) ) {
-
-				$response = (array) $response;
-
-				error_log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $response['aCodRespuesta'], $response['aMensajeRespuesta'] ) );
-				error_log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
-
-				return $response;
-
-			} elseif ( ! empty( $response ) ) {
-				error_log( sprintf( 'CodRespuesta: %s, Args: %s', print_r( $response, 1 ), print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
-
-			} else {
-				error_log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
+			$request_response = $this->request( 'ccrRegistroEnvio', $replacements );
+			
+			if ( is_object( $request_response ) && isset( $request_response->aCodRespuesta ) ) {
+				
+				$response['status'] = 'ok';
+				
+				$this->log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $request_response?->aCodRespuesta, $request_response?->aMensajeRespuesta ) );
+				$this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
+				
+			} else{
+				
+				$response['status'] = 'error';
+				$this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
 			}
+			
+			$response['response'] = (array) $request_response;
 
 		} else {
-
-			error_log( 'ccrRegistroEnvio aborted.' );
-			return sprintf( ' Register sending aborted due errors' );
+			$response['status'] = 'error';
+			$this->log( 'ccrRegistroEnvio aborted.' );
 		}
 
-		return $status;
+		return $response;
 
 	}
 
 
 	/**
 	 * Get tracking movil
-	 *
-	 * @param string $guide_number Unique package PYMEXPRESS ID
-	 * @return array
 	 */
-	public function get_tracking( $guide_number ) {
+	public function get_tracking( string $guide_number ): string 
+	{
 
 		$data         = array();
 		$replacements = array(
@@ -615,13 +555,10 @@ class Pymexpress_WSC {
 
 	/**
 	 * Check the parameters before sent to CCR WS
-	 *
-	 * @param array $replacements Fields to check.
-	 * @param array $data_types Rules to check the fields.
-	 * @param array $method Who call this?.
 	 * @return bool
 	 */
-	private function check_parameters( $replacements, $data_types, $method = '' ) {
+	private function check_parameters( array $replacements, array $data_types, string $method = '' ): bool 
+	{
 
 		$try_register = true;
 		$replacements = $this->clean_soap_fields_to_parameters( $replacements );
@@ -639,7 +576,7 @@ class Pymexpress_WSC {
 					continue;
 				} else {
 					// translators: Param lenght and param data.
-					error_log( sprintf( 'Empty parameter "%1$s" called from "%2$s".', $field, $method ) );
+					$this->log( sprintf( 'Empty parameter "%1$s" called from "%2$s".', $field, $method ) );
 					$try_register = false;
 				}
 			}
@@ -652,7 +589,7 @@ class Pymexpress_WSC {
 				$param_len  = strlen( $field_value );
 				if ( $param_len > $max_length ) {
 					// translators: Param lenght and param data.
-					error_log( sprintf( '"%1$s" cannot exceed %2$s characters. Given: %3$s, "%4$s" called from "%5$s"', $field, $max_length, $param_len, $field_value, $method ) );
+					$this->log( sprintf( '"%1$s" cannot exceed %2$s characters. Given: %3$s, "%4$s" called from "%5$s"', $field, $max_length, $param_len, $field_value, $method ) );
 					$try_register = false;
 				}
 			}
@@ -662,7 +599,7 @@ class Pymexpress_WSC {
 			 */
 			if ( 'numeric' === $field_params['type'] ) {
 				if ( ! is_numeric( $field_value ) ) {
-					error_log( sprintf( 'Bad "%1$s" Given: "%2$s" called from "%3$s"', $field, $field_value, $method ) );
+					$this->log( sprintf( 'Bad "%1$s" Given: "%2$s" called from "%3$s"', $field, $field_value, $method ) );
 					$try_register = false;
 				}
 			}
@@ -673,11 +610,9 @@ class Pymexpress_WSC {
 
 	/**
 	 * Remove the '%' of replacements array
-	 *
-	 * @param array $replacements items to clean.
-	 * @return array
 	 */
-	private function clean_soap_fields_to_parameters( $replacements ) {
+	private function clean_soap_fields_to_parameters( array $replacements ): array 
+	{
 		$data = array();
 		foreach ( $replacements as $field => $field_value ) {
 			$field_name          = str_replace( '%', '', $field );
@@ -689,20 +624,12 @@ class Pymexpress_WSC {
 
 	/**
 	 * Web Service Request
-	 *
-	 * @param String $method Method to call.
-	 * @param array  $args Params.
-	 * @param array  $replacements Replacements.
-	 * @return void
 	 */
-	private function request( $method = null, $replacements = array() ) {
-
-		if ( is_null( $method ) ) {
-			return;
-		}
+	private function request( string $method, array $replacements = array() ): object|bool 
+	{
 
 		if ( ! in_array( $method, $this->methods, true ) ) {
-			return -1;
+			return false;
 		}
 
 		$curl       = curl_init();
@@ -729,12 +656,15 @@ class Pymexpress_WSC {
 
 		curl_setopt_array( $curl, $parameters );
 
+		$this->log( $parameters );
 		$response = curl_exec( $curl );
+		$this->log( $response );
+
 		$err      = curl_error( $curl );
 
 		if ( $err ) {
-			error_log( sprintf( 'Error in service query: %s', $err ) );
-			return;
+			$this->log( sprintf( 'Error in service query: %s', $err ) );
+			return $response;
 		}
 
 		// SimpleXML seems to have problems with the colon ":" in the <xxx:yyy> response tags, so take them out.
@@ -743,17 +673,15 @@ class Pymexpress_WSC {
 		$str_response = $method . 'Response';
 		$str_result   = $method . 'Result';
 
-		$response = $xml->sBody->$str_response->$str_result;
-		return $response;
+		return $xml?->sBody?->$str_response?->$str_result;
 	}
 
 
 	/**
 	 * Set proxy settings
-	 *
-	 * @return void
 	 */
-	public function set_proxy( $params ) {
+	public function set_proxy( array $params ): void 
+	{
 		$this->proxy_settings['hostname'] = $params['hostname'];
 		$this->proxy_settings['username'] = $params['username'];
 		$this->proxy_settings['password'] = $params['password'];
@@ -762,11 +690,9 @@ class Pymexpress_WSC {
 
 	/**
 	 * Set proxy settings in the curl options
-	 *
-	 * @param array $parameters Curl params.
-	 * @return array
 	 */
-	private function set_proxy_settings( $parameters ) {
+	private function set_proxy_settings( array $parameters ): array 
+	{
 
 		/**
 		 * Proxy settings
@@ -789,12 +715,9 @@ class Pymexpress_WSC {
 
 	/**
 	 * Prepare soap string before request.
-	 *
-	 * @param string $method Method to evaluate.
-	 * @param array  $replacements Data to set into SOAP string.
-	 * @return string
 	 */
-	private function get_soap_fields( $method, $replacements = array() ) {
+	private function get_soap_fields( string $method, array $replacements = array() ): string 
+	{
 
 		$fields = array(
 
