@@ -27,7 +27,7 @@ class Pymexpress_WSC {
 		 * Set debug = true to log errors.
 		 * $pymespress->debug = true;
 		 */
-		$this->log = false;
+		$this->debug = false;
 
 		$this->credentials = array(
 			'Username'    => $username,
@@ -71,7 +71,7 @@ class Pymexpress_WSC {
 
 	private function log( $message )
 	{
-		if ( $this->debug ) {
+		if ( $this?->debug ) {
 			error_log( print_r( $message, true ) );
 		}
 	}
@@ -119,12 +119,14 @@ class Pymexpress_WSC {
 		curl_setopt_array( $curl, $parameters );
 
 		$response = curl_exec( $curl );
+		$this->log( $response );
 		$err      = curl_error( $curl );
 
 		curl_close( $curl );
 
 		if ( $err ) {
 			$this->log( $err );
+			return false;
 
 		} else {
 
@@ -379,13 +381,22 @@ class Pymexpress_WSC {
 		);
 
 		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__ ) ) {
+
 			$response = $this->request( 'ccrTarifa', $replacements );
 			$data     = (array) $response;
-			$rate     = array(
-				'tarifa'    => $data['aMontoTarifa'],
-				'descuento' => $data['aDescuento'],
-				'impuesto'  => $data['aImpuesto'],
-			);
+
+			if ( ! empty( $data['aMontoTarifa'] ) ) {
+				$rate['tarifa'] = $data['aMontoTarifa'];
+			}
+
+			if ( ! empty( $data['aDescuento'] ) ) {
+				$rate['descuento'] = $data['aDescuento'];
+			}
+
+			if ( ! empty( $data['aImpuesto'] ) ) {
+				$rate['impuesto'] = $data['aImpuesto'];
+			}
+
 		}
 		return $rate;
 	}
@@ -400,7 +411,8 @@ class Pymexpress_WSC {
 	{
 		$response = $this->request( 'ccrGenerarGuia' );
 		$data     = (array) $response;
-		return $data['aNumeroEnvio'];
+		$guide    = $data['aNumeroEnvio'] ?? '';
+		return $guide;
 	}
 
 
@@ -491,7 +503,11 @@ class Pymexpress_WSC {
 			
 			if ( is_object( $request_response ) && isset( $request_response->aCodRespuesta ) ) {
 				
-				$response['status'] = 'ok';
+				if ( $request_response->aCodRespuesta === '00') {
+					$response['status'] = 'ok';
+				} else {
+					$response['status'] = 'error';
+				}
 				
 				$this->log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $request_response?->aCodRespuesta, $request_response?->aMensajeRespuesta ) );
 				$this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
@@ -656,10 +672,7 @@ class Pymexpress_WSC {
 
 		curl_setopt_array( $curl, $parameters );
 
-		$this->log( $parameters );
 		$response = curl_exec( $curl );
-		$this->log( $response );
-
 		$err      = curl_error( $curl );
 
 		if ( $err ) {
