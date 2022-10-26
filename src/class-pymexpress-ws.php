@@ -774,7 +774,12 @@ class Pymexpress_WSC {
 
 		$field = $fields[ $method ];
 		foreach ( $replacements as $key => $value ) {
+			/**	
+			 * Correos de Costa Rica no  soporta ampersand (&) en el parámetro SEND_NOMBRE y posiblemente otros
+			 */
+			$value = str_replace( '&', '', $value );
 			$field = str_replace( $key, $value, $field );
+
 		}
 
 		// Remove empty replacements.
