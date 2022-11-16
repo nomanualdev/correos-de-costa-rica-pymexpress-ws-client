@@ -74,6 +74,7 @@ class Pymexpress_WSC {
 		if ( $this?->debug ) {
 			error_log( print_r( $message, true ) );
 		}
+		return print_r( $message, true );
 	}
 
 	/**
@@ -425,6 +426,7 @@ class Pymexpress_WSC {
 		$response     = array(
 			'status'   => '',
 			'response' => array(),
+			'log'    => '',
 		);
 		$replacements = array(
 			'%Cliente%'        => $this->credentials['Client_code'],
@@ -499,30 +501,41 @@ class Pymexpress_WSC {
 
 		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__ ) ) {
 
+			\SoyCharlie\Utils\Utils::debug( '1' );
+
 			$request_response = $this->request( 'ccrRegistroEnvio', $replacements );
+			$response['log'] .= $this->log( $this );
 			
 			if ( is_object( $request_response ) && isset( $request_response->aCodRespuesta ) ) {
+
+				\SoyCharlie\Utils\Utils::debug( '1.1' );
+				\SoyCharlie\Utils\Utils::debug( '1.1' );
 				
-				if ( $request_response->aCodRespuesta === '00') {
+				if ( $request_response->aCodRespuesta == '00') {
+					\SoyCharlie\Utils\Utils::debug( '1.1.1' );
 					$response['status'] = 'ok';
 				} else {
+					\SoyCharlie\Utils\Utils::debug( '1.1.2' );
 					$response['status'] = 'error';
 				}
 				
-				$this->log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $request_response?->aCodRespuesta, $request_response?->aMensajeRespuesta ) );
-				$this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
+				$response['log'] .= $this->log( sprintf( 'Guide number: %s, Order id: %s, CodRespuesta: %s: %s', $params['ENVIO_ID'], $order_id, $request_response?->aCodRespuesta, $request_response?->aMensajeRespuesta ) );
+				$response['log'] .= $this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
 				
 			} else{
+
+				\SoyCharlie\Utils\Utils::debug( '1.2' );
 				
 				$response['status'] = 'error';
-				$this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
+				$response['log'] .= $this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
 			}
 			
 			$response['response'] = (array) $request_response;
 
 		} else {
+			\SoyCharlie\Utils\Utils::debug( '2' );
 			$response['status'] = 'error';
-			$this->log( 'ccrRegistroEnvio aborted.' );
+			$response['log'] .= $this->log( 'ccrRegistroEnvio aborted.' );
 		}
 
 		return $response;
@@ -675,8 +688,9 @@ class Pymexpress_WSC {
 		$response = curl_exec( $curl );
 		$err      = curl_error( $curl );
 
-		if ( $err ) {
+		if ( $this?->debug ) {
 			$this->log( sprintf( 'Error in service query: %s', $err ) );
+			$this->log( sprintf( 'Response: %s', $response ) );
 			return $response;
 		}
 
