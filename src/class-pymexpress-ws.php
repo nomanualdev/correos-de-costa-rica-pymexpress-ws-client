@@ -411,9 +411,10 @@ class Pymexpress_WSC {
 	public function generar_guia(): string 
 	{
 		$response = $this->request( 'ccrGenerarGuia' );
-		$this->log( $response );
 		$data     = (array) $response;
+		$this->log( $data );
 		$guide    = $data['aNumeroEnvio'] ?? '';
+		$this->log( $guide );
 		return $guide;
 	}
 
@@ -502,21 +503,21 @@ class Pymexpress_WSC {
 
 		if ( $this->check_parameters( $replacements, $data_types, __FUNCTION__ ) ) {
 
-			\SoyCharlie\Utils\Utils::debug( '1' );
+			$this->log( '1' );
 
 			$request_response = $this->request( 'ccrRegistroEnvio', $replacements );
 			$response['log'] .= $this->log( $this );
 			
 			if ( is_object( $request_response ) && isset( $request_response->aCodRespuesta ) ) {
 
-				\SoyCharlie\Utils\Utils::debug( '1.1' );
-				\SoyCharlie\Utils\Utils::debug( '1.1' );
+				$this->log( '1.1' );
+				$this->log( '1.1' );
 				
 				if ( $request_response->aCodRespuesta == '00') {
-					\SoyCharlie\Utils\Utils::debug( '1.1.1' );
+					$this->log( '1.1.1' );
 					$response['status'] = 'ok';
 				} else {
-					\SoyCharlie\Utils\Utils::debug( '1.1.2' );
+					$this->log( '1.1.2' );
 					$response['status'] = 'error';
 				}
 				
@@ -525,7 +526,7 @@ class Pymexpress_WSC {
 				
 			} else{
 
-				\SoyCharlie\Utils\Utils::debug( '1.2' );
+				$this->log( '1.2' );
 				
 				$response['status'] = 'error';
 				$response['log'] .= $this->log( sprintf( 'Args: %s', print_r( $this->clean_soap_fields_to_parameters( $replacements ), 1 ) ) );
@@ -534,7 +535,7 @@ class Pymexpress_WSC {
 			$response['response'] = (array) $request_response;
 
 		} else {
-			\SoyCharlie\Utils\Utils::debug( '2' );
+			$this->log( '2' );
 			$response['status'] = 'error';
 			$response['log'] .= $this->log( 'ccrRegistroEnvio aborted.' );
 		}
