@@ -1,3 +1,10 @@
+# Actualización planeada para Enero 2023
+
+Por favor revisar rama php8+
+
+Cualquier PR es bienvenido.
+
+
 # correos-de-costa-rica-pymexpress-ws-client
 
 PHP WS Client Based on Mojito Shipping
