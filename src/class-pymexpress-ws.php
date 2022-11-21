@@ -599,6 +599,8 @@ class Pymexpress_WSC {
 
 			$field_params = $data_types[ $field ];
 
+			$this->log( sprintf( 'Checking "%1$s" called from "%2$s".', $field, $method ) );
+
 			/**
 			 * Check if field is empty and if should be
 			 */
