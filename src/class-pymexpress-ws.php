@@ -691,9 +691,10 @@ class Pymexpress_WSC {
 		$err      = curl_error( $curl );
 
 		if ( $this?->debug ) {
-			$this->log( sprintf( 'Error in service query: %s', $err ) );
+			if ( $err ) {
+				$this->log( sprintf( 'Error in service query: %s', $err ) );
+			}
 			$this->log( sprintf( 'Response: %s', $response ) );
-			return $response;
 		}
 
 		// SimpleXML seems to have problems with the colon ":" in the <xxx:yyy> response tags, so take them out.
