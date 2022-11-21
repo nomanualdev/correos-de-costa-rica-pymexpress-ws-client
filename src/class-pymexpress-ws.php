@@ -71,7 +71,7 @@ class Pymexpress_WSC {
 
 	private function log( $message )
 	{
-		if ( $this?->debug ) {
+		if ( $this?->debug === true ) {
 			error_log( print_r( $message, true ) );
 		}
 		return print_r( $message, true );
@@ -411,6 +411,7 @@ class Pymexpress_WSC {
 	public function generar_guia(): string 
 	{
 		$response = $this->request( 'ccrGenerarGuia' );
+		$this->log( $response );
 		$data     = (array) $response;
 		$guide    = $data['aNumeroEnvio'] ?? '';
 		return $guide;
