@@ -1,4 +1,4 @@
-# Actualización planeada para Enero 2023
+# Actualización planeada para 2023
 
 Por favor revisar rama php8+
 
